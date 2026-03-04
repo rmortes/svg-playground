@@ -1,0 +1,8 @@
+{
+  // MD013: line length — 80 chars is too narrow for technical docs with tables/code.
+  // Set to 120 or disable entirely.
+  "MD013": false,
+  // MD060: table column style — allow compact separator rows (|---|---|)
+  // without requiring spaces inside separators.
+  "MD060": false
+}
