@@ -53,7 +53,9 @@ doesn't exist yet.
 
 ## Layout
 
-The app is a three-panel horizontal layout:
+### Desktop (> 768 px)
+
+Three-panel horizontal layout:
 
 ```text
 ┌──────────────────┬──────────────────┬──────────────┐
@@ -63,6 +65,31 @@ The app is a three-panel horizontal layout:
 │                  │                  │              │
 └──────────────────┴──────────────────┴──────────────┘
 ```
+
+### Mobile (≤ 768 px)
+
+Two-row layout. The page is scrollable so that tapping the editor and opening
+the soft keyboard naturally scrolls the SVG preview off the top of the screen:
+
+```text
+┌──────────────────────────────────┐  ← scrolls off top when keyboard opens
+│         SVG Preview              │  (height: 56vw, min 180 px)
+├──────────────────────────────────┤
+│   [ Code ]   [ Tools ]           │  ← tab bar (always visible)
+├──────────────────────────────────┤
+│   Code Editor  OR  Tools Panel   │  (height: 100vh — fills screen below bar)
+└──────────────────────────────────┘
+```
+
+- The **Code** tab is active by default.
+- Tapping **Tools** switches the bottom panel to the Tools Panel; the tab bar
+  highlights the active tab with a blue underline.
+- The SVG Preview and the active tab bar stick to their natural position in the
+  document flow — no JavaScript is required for the scroll-and-keyboard behaviour.
+
+---
+
+### Panel descriptions
 
 - **Code Editor** — Write JSX. The editor debounces changes by 500 ms before recompiling.
   - **Autocompletion** for `useInput`, `useRange`, `React.*` members, and common SVG elements. Completions include parameter snippets with tab stops.

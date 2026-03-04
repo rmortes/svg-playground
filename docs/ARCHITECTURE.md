@@ -25,6 +25,11 @@
 │                                  │  clearTools()        │  │
 │                                  │  localStorage ↔ state│  │
 │                                  └──────────────────────┘  │
+│                                                            │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  .mobile-tab-bar  (rendered in DOM; hidden ≥ 769 px) │  │
+│  │  [ Code ]  [ Tools ]  ← drives mobileTab state       │  │
+│  └──────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -222,12 +227,55 @@ The **Reset to Defaults** button in `ToolsPanel` calls `handleReset` in `App.tsx
 
 ---
 
+## Mobile responsive layout
+
+On viewports ≤ 768 px the desktop CSS grid is replaced by a flex column
+(`App.css` `@media (max-width: 768px)`).
+
+### DOM order vs. visual order
+
+The desktop layout uses named `grid-template-areas` so that the markup order (editor →
+preview → tools) is independent of the three-column visual order. On mobile the same
+DOM order plus `order` properties produces:
+
+| `order` | Element | Height |
+|---|---|---|
+| 1 | `.svg-preview` | `56vw`, min `180px` |
+| 2 | `.mobile-tab-bar` | intrinsic (~42 px) |
+| 3 | `.code-editor` | `100vh` |
+| 4 | `.tools-panel` | `100vh` |
+
+### Natural keyboard scroll
+
+The `.app` container switches from `height: 100vh; overflow: hidden` (desktop) to
+`height: auto; overflow: visible` (mobile). This means the total page height is
+`56vw + ~42px + 100vh`, which is greater than `100vh`, so a natural scroll range
+exists. When the user taps the editor and the soft keyboard opens, the browser
+automatically scrolls the page so the focused element is visible — the SVG preview
+slides off the top of the viewport without any JavaScript.
+
+### Tab switching
+
+`App.tsx` holds a `mobileTab: 'editor' | 'tools'` state value (default `'editor'`).
+It is written as a `data-mobile-tab` attribute on the root `.app` div. Two CSS
+attribute selectors in the mobile media query hide the inactive panel:
+
+```css
+.app[data-mobile-tab="tools"]  .code-editor  { display: none; }
+.app[data-mobile-tab="editor"] .tools-panel  { display: none; }
+```
+
+The tab bar itself is a `role="tablist"` div with two `role="tab"` buttons. It is
+rendered in the DOM at all times but hidden on desktop via `display: none`.
+
+---
+
 ## File structure
 
 ```text
 svg-playground/
 ├── src/
-│   ├── App.tsx                  # Root: layout, state, persistence wiring
+│   ├── App.tsx                  # Root: layout, state, persistence wiring, mobileTab
 │   ├── types.ts                 # ToolDef, RegisterFn, CompilationResult
 │   │
 │   ├── components/
@@ -378,3 +426,6 @@ check docs locally before committing.
 | Zoom origin uses `canvasRef.getBoundingClientRect()`, not `containerRef` | The container uses flex centering, which offsets the canvas from the container's origin; measuring the canvas directly eliminates that offset |
 | No `will-change: transform` on the canvas div | Prevents GPU rasterisation of the SVG at its original pixel dimensions; the browser repaints from vector source at the correct resolution on every frame, keeping SVGs crisp at any zoom level |
 | Static regex analysis for infinite loops rather than loop-counter injection | A regex pre-pass is simple, zero-overhead at runtime, and covers the common accidental patterns. Loop-counter injection (transforming every loop body) would be more complete but adds AST complexity and runtime cost on every render. Infinite recursion is not guarded this way because it throws a catchable `RangeError` rather than freezing — the `ErrorBoundary` and `new Function` wrapper already handle it. |
+| Mobile layout uses `height: auto` + natural page scroll instead of a fixed viewport | Lets the browser's built-in scroll-to-focused-element behaviour move the SVG preview out of the way when the soft keyboard opens — zero JavaScript required |
+| Tab switching driven by a `data-mobile-tab` attribute + CSS attribute selectors | Keeps tab logic in CSS; React only manages a single string state value and sets the attribute |
+| Tab bar rendered in DOM on all breakpoints, hidden via `display: none` on desktop | Simpler than conditional rendering; avoids remounting the panels when resizing across the breakpoint |

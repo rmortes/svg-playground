@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import type { MouseEvent } from 'react';
 import { CodeEditor } from './components/CodeEditor';
 import { SvgPreview } from './components/SvgPreview';
 import { ToolsPanel } from './components/ToolsPanel';
@@ -48,6 +49,11 @@ return (
 export function App() {
   const [code, setCode] = useState(() => loadSavedCode() || DEFAULT_CODE);
   const [debouncedCode, setDebouncedCode] = useState(code);
+  const [mobileTab, setMobileTab] = useState<'editor' | 'tools'>('editor');
+
+  const handleTabClick = useCallback((tab: 'editor' | 'tools') => {
+    return (_e: MouseEvent<HTMLButtonElement>) => setMobileTab(tab);
+  }, []);
   const [compiledComponent, setCompiledComponent] = useState<ComponentType | null>(null);
   const [compileError, setCompileError] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -112,7 +118,7 @@ export function App() {
   }, [clearTools]);
 
   return (
-    <div className="app">
+    <div className="app" data-mobile-tab={mobileTab}>
       <CodeEditor value={code} onChange={setCode} compilationError={compileError} />
       <SvgPreview
         component={compiledComponent}
@@ -121,6 +127,24 @@ export function App() {
         onAfterRender={handleAfterRender}
       />
       <ToolsPanel tools={tools} onToolValueChange={setToolValue} onReset={handleReset} />
+      <div className="mobile-tab-bar" role="tablist" aria-label="Panel tabs">
+        <button
+          role="tab"
+          aria-selected={mobileTab === 'editor'}
+          className={`mobile-tab-btn${mobileTab === 'editor' ? ' active' : ''}`}
+          onClick={handleTabClick('editor')}
+        >
+          Code
+        </button>
+        <button
+          role="tab"
+          aria-selected={mobileTab === 'tools'}
+          className={`mobile-tab-btn${mobileTab === 'tools' ? ' active' : ''}`}
+          onClick={handleTabClick('tools')}
+        >
+          Tools
+        </button>
+      </div>
     </div>
   );
 }
