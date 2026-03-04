@@ -17,11 +17,37 @@ Other commands:
 
 | Command | Purpose |
 |---|---|
-| `npm run build` | Production build to `dist/` |
+| `npm run build` | Production build to `dist/` (base path `/`) |
+| `npm run build:gh` | Production build for GitHub Pages (`base=/svg-playground/`) |
+| `npm run deploy:cf` | Build and deploy to Cloudflare Pages |
 | `npm test` | Run the full test suite (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
 | `npm run lint:docs` | Lint all `docs/` markdown files |
+
+---
+
+## Deployment
+
+The app is a fully static SPA — no server required. Two hosting targets are supported.
+
+### GitHub Pages
+
+A GitHub Actions workflow ([`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml))
+automatically type-checks, tests, builds, and deploys on every push to `main`.
+
+### Cloudflare Pages
+
+Deploy manually from your local machine:
+
+```bash
+npm run deploy:cf
+```
+
+This builds the project (base path `/`) and pushes `dist/` to the
+`svg-playground` Cloudflare Pages project via Wrangler. On first run,
+`wrangler` will prompt you to log in and will create the project if it
+doesn't exist yet.
 
 ---
 

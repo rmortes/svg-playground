@@ -11,7 +11,9 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
-    "types": ["vitest/config"],
+    "types": [
+      "vitest/config"
+    ],
     "moduleDetection": "force",
     "noEmit": true,
     /* Linting */

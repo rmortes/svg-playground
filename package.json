@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:gh": "tsc -b && vite build --base=/svg-playground/",
+    "deploy:cf": "npm run build && npx wrangler pages publish dist --project-name=svg-playground",
     "lint": "eslint .",
     "lint:docs": "markdownlint-cli2 \"docs/**/*.md\"",
     "preview": "vite preview",
